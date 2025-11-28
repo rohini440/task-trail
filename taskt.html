@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Task Trail — Advanced To‑Do & Task Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #fff;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-light: #3b82f6;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --text: #0f172a;
+      --border: rgba(15,23,42,0.06);
+      --shadow: 0 6px 18px rgba(18,24,40,0.06);
+      --radius: 14px;
+      --transition: all 0.2s ease;
+    }
+
+    .dark-mode {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-light: #60a5fa;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --text: #f1f5f9;
+      --border: rgba(241,245,249,0.06);
+      --shadow: 0 6px 18px rgba(0,0,0,0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, 'Helvetica Neue', Arial;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: var(--transition);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .logo {
+      color: var(--accent);
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(18,24,40,0.1);
+    }
+
+    .card .label {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .card .value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .card .subvalue {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Add task form */
+    .add-task {
+      display: grid;
+      grid-template-columns: 1fr 140px 140px 160px 120px;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .input, .select, .textarea {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    .input:focus, .select:focus, .textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--card);
+      color: var(--text);
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 14px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chip.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .search-container {
+      flex: 1;
+      position: relative;
+    }
+
+    .search {
+      width: 100%;
+      padding: 10px 40px 10px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+
+    /* Task list */
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .task {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 18px;
+      border-radius: 12px;
+      background: var(--card);
+      box-shadow: 0 4px 12px rgba(18,24,40,0.04);
+      transition: var(--transition);
+      border-left: 4px solid transparent;
+    }
+
+    .task:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(18,24,40,0.08);
+    }
+
+    .task.priority-high {
+      border-left-color: var(--red);
+    }
+
+    .task.priority-medium {
+      border-left-color: var(--yellow);
+    }
+
+    .task.priority-low {
+      border-left-color: var(--green);
+    }
+
+    .task.completed {
+      opacity: 0.7;
+    }
+
+    .task .left {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      flex: 1;
+    }
+
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: var(--transition);
+    }
+
+    .checkbox.checked {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .task.completed .title {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .description {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .meta {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tag.priority-high {
+      background: rgba(239,68,68,0.1);
+      color: var(--red);
+    }
+
+    .tag.priority-medium {
+      background: rgba(245,158,11,0.08);
+      color: var(--yellow);
+    }
+
+    .tag.priority-low {
+      background: rgba(16,185,129,0.06);
+      color: var(--green);
+    }
+
+    .tag.category {
+      background: rgba(37,99,235,0.08);
+      color: var(--accent);
+    }
+
+    .tag.overdue {
+      background: rgba(239,68,68,0.1);
+      color: var(--red);
+    }
+
+    .tag.recurring {
+      background: rgba(139,92,246,0.1);
+      color: var(--purple);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      color: var(--muted);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Subtasks */
+    .subtasks {
+      margin-top: 12px;
+      padding-left: 20px;
+      border-left: 2px solid var(--border);
+    }
+
+    .subtask {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .subtask-checkbox {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .subtask-checkbox.checked {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+
+    .subtask.completed .subtask-title {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .subtask-progress {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Empty state */
+    .empty {
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      background: linear-gradient(180deg, rgba(16,24,40,0.02), transparent);
+      border-radius: 12px;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card);
+      border-radius: var(--radius);
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* Focus mode */
+    .focus-mode {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .focus-mode.active {
+      display: flex;
+    }
+
+    .focus-task {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .timer {
+      font-size: 72px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: var(--accent);
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .timer-settings {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      align-items: center;
+    }
+
+    .timer-input {
+      width: 60px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-align: center;
+    }
+
+    /* Kanban view */
+    .kanban {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .kanban.active {
+      display: grid;
+    }
+
+    .kanban-column {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .kanban-header {
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .kanban-tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Calendar view */
+    .calendar {
+      display: none;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .calendar.active {
+      display: block;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .calendar-day {
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      min-height: 80px;
+      background: var(--bg);
+    }
+
+    .calendar-day.active {
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .calendar-day.has-tasks {
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .calendar-day-number {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .calendar-tasks {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* View controls */
+    .view-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .view-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .view-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--card);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--green);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--red);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .add-task {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .kanban {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+      
+      .add-task {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-container {
+        width: 100%;
+      }
+      
+      .task {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .actions {
+        align-self: flex-end;
+      }
+      
+      .calendar-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-tasks logo"></i> Task Trail</h1>
+      <div class="header-controls">
+        <button id="themeToggle" class="icon-btn" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button id="focusModeBtn" class="btn-secondary">
+          <i class="fas fa-crosshairs"></i> Focus Mode
+        </button>
+        <button id="newTaskBtn" class="btn">
+          <i class="fas fa-plus"></i> New Task
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="card">
+        <div class="label">Total Tasks</div>
+        <div class="value" id="total">0</div>
+        <div class="subvalue" id="totalSub">0 overdue</div>
+      </div>
+      <div class="card">
+        <div class="label">Completed</div>
+        <div class="value" id="completed">0</div>
+        <div class="subvalue" id="completedSub">Today: 0</div>
+      </div>
+      <div class="card">
+        <div class="label">Pending</div>
+        <div class="value" id="pending">0</div>
+        <div class="subvalue" id="pendingSub">Due today: 0</div>
+      </div>
+      <div class="card">
+        <div class="label">Completion Rate</div>
+        <div class="value" id="rate">0%</div>
+        <div class="subvalue" id="streak">Current streak: 0 days</div>
+      </div>
+    </div>
+
+    <!-- View Controls -->
+    <div class="view-controls">
+      <button class="view-btn active" data-view="list">
+        <i class="fas fa-list"></i> List
+      </button>
+      <button class="view-btn" data-view="kanban">
+        <i class="fas fa-columns"></i> Kanban
+      </button>
+      <button class="view-btn" data-view="calendar">
+        <i class="fas fa-calendar"></i> Calendar
+      </button>
+    </div>
+
+    <!-- Add Task -->
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="add-task" id="addRow">
+        <input id="taskInput" class="input" placeholder="Task name...">
+        <select id="prioritySelect" class="select">
+          <option value="High">High Priority</option>
+          <option value="Medium" selected>Medium Priority</option>
+          <option value="Low">Low Priority</option>
+        </select>
+        <select id="categorySelect" class="select">
+          <option value="Personal">Personal</option>
+          <option value="Work">Work</option>
+          <option value="Study">Study</option>
+          <option value="Health">Health</option>
+          <option value="Finance">Finance</option>
+        </select>
+        <input id="dueInput" class="input" type="date">
+        <input id="timeEstimate" class="input" type="number" min="1" placeholder="Time (min)">
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 12px;">
+        <button id="addBtn" class="btn">
+          <i class="fas fa-plus"></i> Add Task
+        </button>
+        <button id="clearBtn" class="btn-secondary">
+          <i class="fas fa-trash"></i> Clear Completed
+        </button>
+        <div class="search-container">
+          <input id="search" class="search" placeholder="Search tasks...">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters & Controls -->
+    <div class="controls">
+      <div class="chip active" id="filterAll">
+        <i class="fas fa-layer-group"></i> All
+      </div>
+      <div class="chip" id="filterPending">
+        <i class="fas fa-clock"></i> Pending
+      </div>
+      <div class="chip" id="filterCompleted">
+        <i class="fas fa-check-circle"></i> Completed
+      </div>
+      <div class="chip" id="filterToday">
+        <i class="fas fa-calendar-day"></i> Today
+      </div>
+      <div class="chip" id="filterOverdue">
+        <i class="fas fa-exclamation-circle"></i> Overdue
+      </div>
+      <div style="flex: 1"></div>
+      <div class="chip" id="sortBtn">
+        <i class="fas fa-sort"></i> Sort: New → Old
+      </div>
+    </div>
+
+    <!-- List View -->
+    <div class="list" id="taskList"></div>
+
+    <!-- Kanban View -->
+    <div class="kanban" id="kanbanView">
+      <div class="kanban-column">
+        <div class="kanban-header">To Do</div>
+        <div class="kanban-tasks" id="kanbanTodo"></div>
+      </div>
+      <div class="kanban-column">
+        <div class="kanban-header">In Progress</div>
+        <div class="kanban-tasks" id="kanbanProgress"></div>
+      </div>
+      <div class="kanban-column">
+        <div class="kanban-header">Completed</div>
+        <div class="kanban-tasks" id="kanbanCompleted"></div>
+      </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div class="calendar" id="calendarView">
+      <div class="calendar-header">
+        <button id="prevMonth" class="icon-btn">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <h3 id="currentMonth">June 2023</h3>
+        <button id="nextMonth" class="icon-btn">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty" style="display:none">
+      <div class="empty-icon">
+        <i class="fas fa-clipboard-list"></i>
+      </div>
+      <h3>No tasks yet</h3>
+      <p>Add your first task to get started with Task Trail</p>
+    </div>
+  </div>
+
+  <!-- Focus Mode -->
+  <div class="focus-mode" id="focusMode">
+    <div class="focus-task">
+      <h2 id="focusTaskTitle">No task selected</h2>
+      <p id="focusTaskDescription"></p>
+    </div>
+    <div class="timer" id="timer">25:00</div>
+    <div class="timer-controls">
+      <button class="btn" id="startTimer">
+        <i class="fas fa-play"></i> Start
+      </button>
+      <button class="btn-secondary" id="pauseTimer">
+        <i class="fas fa-pause"></i> Pause
+      </button>
+      <button class="btn-secondary" id="resetTimer">
+        <i class="fas fa-redo"></i> Reset
+      </button>
+      <button class="btn-secondary" id="exitFocus">
+        <i class="fas fa-times"></i> Exit
+      </button>
+    </div>
+    <div class="timer-settings">
+      <span>Set timer (minutes):</span>
+      <input type="number" id="timerMinutes" class="timer-input" min="1" max="120" value="25">
+      <button class="btn-secondary" id="applyTimer">
+        Apply
+      </button>
+    </div>
+  </div>
+
+  <!-- Task Detail Modal -->
+  <div class="modal" id="taskModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Task Details</h3>
+        <button class="icon-btn" id="closeModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 16px;">
+          <label for="modalTaskTitle" style="display: block; margin-bottom: 6px; font-weight: 600;">Title</label>
+          <input type="text" id="modalTaskTitle" class="input" style="width: 100%;">
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label for="modalTaskDescription" style="display: block; margin-bottom: 6px; font-weight: 600;">Description</label>
+          <textarea id="modalTaskDescription" class="textarea" rows="3" style="width: 100%;"></textarea>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label for="modalTaskPriority" style="display: block; margin-bottom: 6px; font-weight: 600;">Priority</label>
+            <select id="modalTaskPriority" class="select" style="width: 100%;">
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div>
+            <label for="modalTaskCategory" style="display: block; margin-bottom: 6px; font-weight: 600;">Category</label>
+            <select id="modalTaskCategory" class="select" style="width: 100%;">
+              <option value="Personal">Personal</option>
+              <option value="Work">Work</option>
+              <option value="Study">Study</option>
+              <option value="Health">Health</option>
+              <option value="Finance">Finance</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label for="modalTaskDue" style="display: block; margin-bottom: 6px; font-weight: 600;">Due Date</label>
+            <input type="date" id="modalTaskDue" class="input" style="width: 100%;">
+          </div>
+          <div>
+            <label for="modalTaskTime" style="display: block; margin-bottom: 6px; font-weight: 600;">Time Estimate (min)</label>
+            <input type="number" id="modalTaskTime" class="input" style="width: 100%;" min="1">
+          </div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 6px; font-weight: 600;">Subtasks</label>
+          <div id="modalSubtasks">
+            <!-- Subtasks will be added here -->
+          </div>
+          <button class="btn-secondary" id="addSubtask" style="margin-top: 8px;">
+            <i class="fas fa-plus"></i> Add Subtask
+          </button>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 6px; font-weight: 600;">Recurrence</label>
+          <select id="modalTaskRecurrence" class="select" style="width: 100%;">
+            <option value="none">No Recurrence</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelModal">Cancel</button>
+        <button class="btn" id="saveModal">Save Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Task deleted successfully</span>
+  </div>
+
+  <script>
+    // Enhanced Task Trail with advanced features
+    const TASKS_KEY = 'tasktrail.tasks.v2'
+    let tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]')
+    let sortNewest = true
+    let currentFilter = 'all'
+    let currentView = 'list'
+    let currentEditingTask = null
+    let timerInterval = null
+    let timerSeconds = 25 * 60
+    let isTimerRunning = false
+
+    // DOM Elements
+    const qs = s => document.querySelector(s)
+    const qsa = s => document.querySelectorAll(s)
+
+    // Stats elements
+    const totalEl = qs('#total')
+    const compEl = qs('#completed')
+    const pendEl = qs('#pending')
+    const rateEl = qs('#rate')
+    const totalSubEl = qs('#totalSub')
+    const completedSubEl = qs('#completedSub')
+    const pendingSubEl = qs('#pendingSub')
+    const streakEl = qs('#streak')
+
+    // List and views
+    const listEl = qs('#taskList')
+    const emptyEl = qs('#emptyState')
+    const kanbanView = qs('#kanbanView')
+    const kanbanTodo = qs('#kanbanTodo')
+    const kanbanProgress = qs('#kanbanProgress')
+    const kanbanCompleted = qs('#kanbanCompleted')
+    const calendarView = qs('#calendarView')
+    const calendarGrid = qs('#calendarGrid')
+    const currentMonthEl = qs('#currentMonth')
+
+    // Form elements
+    const addBtn = qs('#addBtn')
+    const newTaskBtn = qs('#newTaskBtn')
+    const addInput = qs('#taskInput')
+    const prioritySelect = qs('#prioritySelect')
+    const categorySelect = qs('#categorySelect')
+    const dueInput = qs('#dueInput')
+    const timeEstimate = qs('#timeEstimate')
+    const searchInput = qs('#search')
+    const clearBtn = qs('#clearBtn')
+    const sortBtn = qs('#sortBtn')
+
+    // Modal elements
+    const taskModal = qs('#taskModal')
+    const modalTitle = qs('#modalTitle')
+    const modalTaskTitle = qs('#modalTaskTitle')
+    const modalTaskDescription = qs('#modalTaskDescription')
+    const modalTaskPriority = qs('#modalTaskPriority')
+    const modalTaskCategory = qs('#modalTaskCategory')
+    const modalTaskDue = qs('#modalTaskDue')
+    const modalTaskTime = qs('#modalTaskTime')
+    const modalSubtasks = qs('#modalSubtasks')
+    const modalTaskRecurrence = qs('#modalTaskRecurrence')
+    const addSubtaskBtn = qs('#addSubtask')
+    const saveModalBtn = qs('#saveModal')
+    const cancelModalBtn = qs('#cancelModal')
+    const closeModalBtn = qs('#closeModal')
+
+    // Focus mode elements
+    const focusMode = qs('#focusMode')
+    const focusModeBtn = qs('#focusModeBtn')
+    const focusTaskTitle = qs('#focusTaskTitle')
+    const focusTaskDescription = qs('#focusTaskDescription')
+    const timerEl = qs('#timer')
+    const startTimerBtn = qs('#startTimer')
+    const pauseTimerBtn = qs('#pauseTimer')
+    const resetTimerBtn = qs('#resetTimer')
+    const exitFocusBtn = qs('#exitFocus')
+    const timerMinutesInput = qs('#timerMinutes')
+    const applyTimerBtn = qs('#applyTimer')
+
+    // Toast notification
+    const toast = qs('#toast')
+    const toastMessage = qs('#toastMessage')
+
+    // Theme toggle
+    const themeToggle = qs('#themeToggle')
+
+    // Utility functions
+    function save() { 
+      localStorage.setItem(TASKS_KEY, JSON.stringify(tasks)) 
+    }
+
+    function uid() { 
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 6) 
+    }
+
+    function formatDate(date) {
+      if (!date) return ''
+      const d = new Date(date)
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    }
+
+    function isOverdue(dueDate) {
+      if (!dueDate) return false
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const due = new Date(dueDate)
+      due.setHours(0, 0, 0, 0)
+      return due < today
+    }
+
+    function isDueToday(dueDate) {
+      if (!dueDate) return false
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const due = new Date(dueDate)
+      due.setHours(0, 0, 0, 0)
+      return due.getTime() === today.getTime()
+    }
+
+    function showToast(message, type = 'success') {
+      toastMessage.textContent = message
+      toast.className = `toast ${type}`
+      toast.classList.add('show')
+      
+      setTimeout(() => {
+        toast.classList.remove('show')
+      }, 3000)
+    }
+
+    // Task management functions
+    function addTask() {
+      const title = addInput.value.trim()
+      if (!title) return flash(addInput)
+      
+      const task = {
+        id: uid(),
+        title,
+        description: '',
+        priority: prioritySelect.value,
+        category: categorySelect.value,
+        due: dueInput.value || null,
+        timeEstimate: timeEstimate.value ? parseInt(timeEstimate.value) : null,
+        status: 'pending',
+        subtasks: [],
+        recurrence: 'none',
+        created: Date.now(),
+        completedAt: null
+      }
+      
+      tasks.unshift(task)
+      save()
+      render()
+      clearForm()
+      showToast('Task added successfully')
+    }
+
+    function clearForm() {
+      addInput.value = ''
+      dueInput.value = ''
+      timeEstimate.value = ''
+      prioritySelect.value = 'Medium'
+      categorySelect.value = 'Personal'
+    }
+
+    function toggleComplete(id) {
+      tasks = tasks.map(t => {
+        if (t.id === id) {
+          const newStatus = t.status === 'completed' ? 'pending' : 'completed'
+          return {
+            ...t,
+            status: newStatus,
+            completedAt: newStatus === 'completed' ? Date.now() : null
+          }
+        }
+        return t
+      })
+      save()
+      render()
+    }
+
+    function toggleSubtaskComplete(taskId, subtaskIndex) {
+      tasks = tasks.map(t => {
+        if (t.id === taskId) {
+          const updatedSubtasks = [...t.subtasks]
+          updatedSubtasks[subtaskIndex] = {
+            ...updatedSubtasks[subtaskIndex],
+            completed: !updatedSubtasks[subtaskIndex].completed
+          }
+          return { ...t, subtasks: updatedSubtasks }
+        }
+        return t
+      })
+      save()
+      render()
+    }
+
+    function deleteTask(id) {
+      // Remove confirmation dialog and delete directly
+      tasks = tasks.filter(t => t.id !== id)
+      save()
+      render()
+      showToast('Task deleted successfully')
+    }
+
+    function editTask(id) {
+      currentEditingTask = tasks.find(t => t.id === id)
+      if (!currentEditingTask) return
+      
+      modalTitle.textContent = 'Edit Task'
+      modalTaskTitle.value = currentEditingTask.title
+      modalTaskDescription.value = currentEditingTask.description || ''
+      modalTaskPriority.value = currentEditingTask.priority
+      modalTaskCategory.value = currentEditingTask.category
+      modalTaskDue.value = currentEditingTask.due || ''
+      modalTaskTime.value = currentEditingTask.timeEstimate || ''
+      modalTaskRecurrence.value = currentEditingTask.recurrence || 'none'
+      
+      // Render subtasks
+      modalSubtasks.innerHTML = ''
+      currentEditingTask.subtasks.forEach((subtask, index) => {
+        const subtaskEl = document.createElement('div')
+        subtaskEl.className = 'subtask'
+        subtaskEl.innerHTML = `
+          <input type="text" class="input" value="${subtask.title}" style="flex: 1;" data-index="${index}">
+          <button class="icon-btn delete-subtask" data-index="${index}">
+            <i class="fas fa-trash"></i>
+          </button>
+        `
+        modalSubtasks.appendChild(subtaskEl)
+      })
+      
+      taskModal.classList.add('active')
+    }
+
+    function saveTask() {
+      if (!currentEditingTask) return
+      
+      const title = modalTaskTitle.value.trim()
+      if (!title) {
+        flash(modalTaskTitle)
+        return
+      }
+      
+      tasks = tasks.map(t => {
+        if (t.id === currentEditingTask.id) {
+          // Collect subtasks from modal
+          const subtaskInputs = modalSubtasks.querySelectorAll('input[type="text"]')
+          const subtasks = Array.from(subtaskInputs).map(input => ({
+            title: input.value.trim(),
+            completed: false
+          })).filter(subtask => subtask.title)
+          
+          return {
+            ...t,
+            title,
+            description: modalTaskDescription.value,
+            priority: modalTaskPriority.value,
+            category: modalTaskCategory.value,
+            due: modalTaskDue.value || null,
+            timeEstimate: modalTaskTime.value ? parseInt(modalTaskTime.value) : null,
+            subtasks,
+            recurrence: modalTaskRecurrence.value
+          }
+        }
+        return t
+      })
+      
+      save()
+      render()
+      taskModal.classList.remove('active')
+      currentEditingTask = null
+      showToast('Task updated successfully')
+    }
+
+    function addSubtask() {
+      const subtaskEl = document.createElement('div')
+      subtaskEl.className = 'subtask'
+      subtaskEl.innerHTML = `
+        <input type="text" class="input" placeholder="Subtask title" style="flex: 1;">
+        <button class="icon-btn delete-subtask">
+          <i class="fas fa-trash"></i>
+        </button>
+      `
+      modalSubtasks.appendChild(subtaskEl)
+    }
+
+    function deleteSubtask(index) {
+      if (currentEditingTask) {
+        const updatedSubtasks = [...currentEditingTask.subtasks]
+        updatedSubtasks.splice(index, 1)
+        currentEditingTask.subtasks = updatedSubtasks
+        renderModalSubtasks()
+      }
+    }
+
+    function renderModalSubtasks() {
+      modalSubtasks.innerHTML = ''
+      if (currentEditingTask) {
+        currentEditingTask.subtasks.forEach((subtask, index) => {
+          const subtaskEl = document.createElement('div')
+          subtaskEl.className = 'subtask'
+          subtaskEl.innerHTML = `
+            <input type="text" class="input" value="${subtask.title}" style="flex: 1;" data-index="${index}">
+            <button class="icon-btn delete-subtask" data-index="${index}">
+              <i class="fas fa-trash"></i>
+            </button>
+          `
+          modalSubtasks.appendChild(subtaskEl)
+        })
+      }
+    }
+
+    function enterFocusMode(taskId) {
+      const task = tasks.find(t => t.id === taskId)
+      if (!task) return
+      
+      focusTaskTitle.textContent = task.title
+      focusTaskDescription.textContent = task.description || 'No description'
+      focusMode.classList.add('active')
+      resetTimer()
+    }
+
+    function startTimer() {
+      if (isTimerRunning) return
+      isTimerRunning = true
+      timerInterval = setInterval(updateTimer, 1000)
+    }
+
+    function pauseTimer() {
+      isTimerRunning = false
+      clearInterval(timerInterval)
+    }
+
+    function resetTimer() {
+      pauseTimer()
+      timerSeconds = parseInt(timerMinutesInput.value) * 60
+      updateTimerDisplay()
+    }
+
+    function updateTimer() {
+      if (timerSeconds <= 0) {
+        pauseTimer()
+        alert('Pomodoro session completed! Take a break.')
+        return
+      }
+      
+      timerSeconds--
+      updateTimerDisplay()
+    }
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timerSeconds / 60)
+      const seconds = timerSeconds % 60
+      timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+    }
+
+    function exitFocusMode() {
+      focusMode.classList.remove('active')
+      pauseTimer()
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode')
+      const isDark = document.body.classList.contains('dark-mode')
+      themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>'
+      themeToggle.title = isDark ? 'Switch to light mode' : 'Switch to dark mode'
+    }
+
+    function flash(el) {
+      el.style.outline = '2px solid rgba(37,99,235,0.2)'
+      setTimeout(() => el.style.outline = 'none', 500)
+    }
+
+    // Rendering functions
+    function render() {
+      listEl.innerHTML = ''
+      kanbanTodo.innerHTML = ''
+      kanbanProgress.innerHTML = ''
+      kanbanCompleted.innerHTML = ''
+      
+      const query = searchInput.value.trim().toLowerCase()
+      let visible = tasks.slice()
+      
+      // Apply filters
+      if (currentFilter === 'pending') {
+        visible = visible.filter(t => t.status === 'pending')
+      } else if (currentFilter === 'completed') {
+        visible = visible.filter(t => t.status === 'completed')
+      } else if (currentFilter === 'today') {
+        visible = visible.filter(t => isDueToday(t.due))
+      } else if (currentFilter === 'overdue') {
+        visible = visible.filter(t => isOverdue(t.due))
+      }
+      
+      // Apply search
+      if (query) {
+        visible = visible.filter(t => 
+          t.title.toLowerCase().includes(query) || 
+          (t.description && t.description.toLowerCase().includes(query))
+        )
+      }
+      
+      // Apply sorting
+      visible.sort((a, b) => {
+        if (sortNewest) {
+          return b.created - a.created
+        } else {
+          return a.created - b.created
+        }
+      })
+      
+      // Update stats
+      updateStats(visible)
+      
+      // Show empty state if no tasks
+      if (!visible.length) {
+        emptyEl.style.display = 'block'
+      } else {
+        emptyEl.style.display = 'none'
+      }
+      
+      // Render based on current view
+      if (currentView === 'list') {
+        visible.forEach(t => listEl.appendChild(createTaskNode(t)))
+      } else if (currentView === 'kanban') {
+        visible.forEach(t => {
+          const taskNode = createTaskNode(t, true)
+          if (t.status === 'completed') {
+            kanbanCompleted.appendChild(taskNode)
+          } else if (t.subtasks.some(st => st.completed)) {
+            kanbanProgress.appendChild(taskNode)
+          } else {
+            kanbanTodo.appendChild(taskNode)
+          }
+        })
+      } else if (currentView === 'calendar') {
+        renderCalendar()
+      }
+    }
+
+    function updateStats(visibleTasks) {
+      const total = tasks.length
+      const completed = tasks.filter(t => t.status === 'completed').length
+      const pending = total - completed
+      const overdue = tasks.filter(t => isOverdue(t.due) && t.status !== 'completed').length
+      const dueToday = tasks.filter(t => isDueToday(t.due) && t.status !== 'completed').length
+      const completedToday = tasks.filter(t => {
+        if (t.status !== 'completed' || !t.completedAt) return false
+        const completedDate = new Date(t.completedAt)
+        const today = new Date()
+        return completedDate.toDateString() === today.toDateString()
+      }).length
+      
+      totalEl.textContent = total
+      compEl.textContent = completed
+      pendEl.textContent = pending
+      rateEl.textContent = total ? Math.round((completed / total) * 100) + '%' : '0%'
+      
+      totalSubEl.textContent = `${overdue} overdue`
+      completedSubEl.textContent = `Today: ${completedToday}`
+      pendingSubEl.textContent = `Due today: ${dueToday}`
+      
+      // Calculate streak (simplified)
+      const today = new Date()
+      let streak = 0
+      for (let i = 0; i < 30; i++) {
+        const date = new Date(today)
+        date.setDate(date.getDate() - i)
+        const tasksCompletedOnDate = tasks.filter(t => {
+          if (t.status !== 'completed' || !t.completedAt) return false
+          const completedDate = new Date(t.completedAt)
+          return completedDate.toDateString() === date.toDateString()
+        })
+        if (tasksCompletedOnDate.length > 0) {
+          streak++
+        } else if (i === 0) {
+          // Today has no completed tasks yet, continue streak from yesterday
+          continue
+        } else {
+          break
+        }
+      }
+      streakEl.textContent = `Current streak: ${streak} days`
+    }
+
+    function createTaskNode(task, compact = false) {
+      const wrap = document.createElement('div')
+      wrap.className = `task priority-${task.priority.toLowerCase()} ${task.status === 'completed' ? 'completed' : ''}`
+      
+      const left = document.createElement('div')
+      left.className = 'left'
+      
+      const checkbox = document.createElement('div')
+      checkbox.className = `checkbox ${task.status === 'completed' ? 'checked' : ''}`
+      checkbox.innerHTML = task.status === 'completed' ? '✓' : ''
+      checkbox.addEventListener('click', () => toggleComplete(task.id))
+      
+      const content = document.createElement('div')
+      content.className = 'task-content'
+      
+      const title = document.createElement('div')
+      title.className = 'title'
+      title.textContent = task.title
+      
+      const description = document.createElement('div')
+      description.className = 'description'
+      description.textContent = task.description || ''
+      
+      const meta = document.createElement('div')
+      meta.className = 'meta'
+      
+      const priorityTag = document.createElement('span')
+      priorityTag.className = `tag priority-${task.priority.toLowerCase()}`
+      priorityTag.textContent = task.priority
+      
+      const categoryTag = document.createElement('span')
+      categoryTag.className = 'tag category'
+      categoryTag.textContent = task.category
+      
+      meta.appendChild(priorityTag)
+      meta.appendChild(categoryTag)
+      
+      if (task.due) {
+        const dueTag = document.createElement('span')
+        dueTag.className = `tag ${isOverdue(task.due) ? 'overdue' : ''}`
+        dueTag.textContent = formatDate(task.due)
+        meta.appendChild(dueTag)
+      }
+      
+      if (task.timeEstimate) {
+        const timeTag = document.createElement('span')
+        timeTag.className = 'tag'
+        timeTag.textContent = `${task.timeEstimate} min`
+        meta.appendChild(timeTag)
+      }
+      
+      if (task.recurrence !== 'none') {
+        const recurTag = document.createElement('span')
+        recurTag.className = 'tag recurring'
+        recurTag.textContent = task.recurrence
+        meta.appendChild(recurTag)
+      }
+      
+      content.appendChild(title)
+      if (!compact && task.description) {
+        content.appendChild(description)
+      }
+      content.appendChild(meta)
+      
+      // Subtasks
+      if (task.subtasks.length > 0) {
+        const subtasksContainer = document.createElement('div')
+        subtasksContainer.className = 'subtasks'
+        
+        const completedSubtasks = task.subtasks.filter(st => st.completed).length
+        const totalSubtasks = task.subtasks.length
+        
+        task.subtasks.forEach((subtask, index) => {
+          const subtaskEl = document.createElement('div')
+          subtaskEl.className = `subtask ${subtask.completed ? 'completed' : ''}`
+          
+          const subtaskCheckbox = document.createElement('div')
+          subtaskCheckbox.className = `subtask-checkbox ${subtask.completed ? 'checked' : ''}`
+          subtaskCheckbox.innerHTML = subtask.completed ? '✓' : ''
+          subtaskCheckbox.addEventListener('click', () => toggleSubtaskComplete(task.id, index))
+          
+          const subtaskTitle = document.createElement('div')
+          subtaskTitle.className = 'subtask-title'
+          subtaskTitle.textContent = subtask.title
+          
+          subtaskEl.appendChild(subtaskCheckbox)
+          subtaskEl.appendChild(subtaskTitle)
+          subtasksContainer.appendChild(subtaskEl)
+        })
+        
+        const progress = document.createElement('div')
+        progress.className = 'subtask-progress'
+        progress.textContent = `${completedSubtasks}/${totalSubtasks} subtasks completed`
+        
+        content.appendChild(subtasksContainer)
+        content.appendChild(progress)
+      }
+      
+      left.appendChild(checkbox)
+      left.appendChild(content)
+      
+      const actions = document.createElement('div')
+      actions.className = 'actions'
+      
+      const focusBtn = document.createElement('button')
+      focusBtn.className = 'icon-btn'
+      focusBtn.title = 'Focus on this task'
+      focusBtn.innerHTML = '<i class="fas fa-crosshairs"></i>'
+      focusBtn.addEventListener('click', () => enterFocusMode(task.id))
+      
+      const editBtn = document.createElement('button')
+      editBtn.className = 'icon-btn'
+      editBtn.title = 'Edit task'
+      editBtn.innerHTML = '<i class="fas fa-edit"></i>'
+      editBtn.addEventListener('click', () => editTask(task.id))
+      
+      const deleteBtn = document.createElement('button')
+      deleteBtn.className = 'icon-btn'
+      deleteBtn.title = 'Delete task'
+      deleteBtn.innerHTML = '<i class="fas fa-trash"></i>'
+      deleteBtn.addEventListener('click', () => deleteTask(task.id))
+      
+      actions.appendChild(focusBtn)
+      actions.appendChild(editBtn)
+      actions.appendChild(deleteBtn)
+      
+      wrap.appendChild(left)
+      wrap.appendChild(actions)
+      
+      return wrap
+    }
+
+    function renderCalendar() {
+      // Simplified calendar rendering for demo
+      const today = new Date()
+      const month = today.getMonth()
+      const year = today.getFullYear()
+      
+      currentMonthEl.textContent = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      
+      // Clear previous calendar
+      calendarGrid.innerHTML = ''
+      
+      // Create day headers
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      days.forEach(day => {
+        const dayHeader = document.createElement('div')
+        dayHeader.className = 'calendar-day'
+        dayHeader.textContent = day
+        dayHeader.style.fontWeight = '600'
+        calendarGrid.appendChild(dayHeader)
+      })
+      
+      // Create days
+      const firstDay = new Date(year, month, 1)
+      const lastDay = new Date(year, month + 1, 0)
+      const daysInMonth = lastDay.getDate()
+      
+      // Add empty cells for days before the first day of the month
+      for (let i = 0; i < firstDay.getDay(); i++) {
+        const emptyDay = document.createElement('div')
+        emptyDay.className = 'calendar-day'
+        calendarGrid.appendChild(emptyDay)
+      }
+      
+      // Add days of the month
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayEl = document.createElement('div')
+        dayEl.className = 'calendar-day active'
+        
+        const dayNumber = document.createElement('div')
+        dayNumber.className = 'calendar-day-number'
+        dayNumber.textContent = i
+        
+        const dayTasks = document.createElement('div')
+        dayTasks.className = 'calendar-tasks'
+        
+        // Find tasks for this day
+        const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`
+        const tasksForDay = tasks.filter(t => t.due === dateStr)
+        
+        if (tasksForDay.length > 0) {
+          dayEl.classList.add('has-tasks')
+          dayTasks.textContent = `${tasksForDay.length} task${tasksForDay.length > 1 ? 's' : ''}`
+        }
+        
+        dayEl.appendChild(dayNumber)
+        dayEl.appendChild(dayTasks)
+        calendarGrid.appendChild(dayEl)
+      }
+    }
+
+    function switchView(view) {
+      currentView = view
+      
+      // Update active view button
+      qsa('.view-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view)
+      })
+      
+      // Show/hide views
+      listEl.style.display = view === 'list' ? 'flex' : 'none'
+      kanbanView.classList.toggle('active', view === 'kanban')
+      calendarView.classList.toggle('active', view === 'calendar')
+      
+      render()
+    }
+
+    // Event listeners
+    addBtn.addEventListener('click', addTask)
+    newTaskBtn.addEventListener('click', () => {
+      // Clear the form and focus on the task input
+      clearForm()
+      addInput.focus()
+    })
+    addInput.addEventListener('keydown', e => e.key === 'Enter' && addTask())
+    clearBtn.addEventListener('click', () => {
+      tasks = tasks.filter(t => t.status !== 'completed')
+      save()
+      render()
+      showToast('Completed tasks cleared')
+    })
+    
+    searchInput.addEventListener('input', render)
+    
+    sortBtn.addEventListener('click', () => {
+      sortNewest = !sortNewest
+      sortBtn.innerHTML = `<i class="fas fa-sort"></i> Sort: ${sortNewest ? 'New → Old' : 'Old → New'}`
+      render()
+    })
+    
+    // Filter chips
+    qs('#filterAll').addEventListener('click', () => {
+      currentFilter = 'all'
+      updateActiveFilter('filterAll')
+      render()
+    })
+    
+    qs('#filterPending').addEventListener('click', () => {
+      currentFilter = 'pending'
+      updateActiveFilter('filterPending')
+      render()
+    })
+    
+    qs('#filterCompleted').addEventListener('click', () => {
+      currentFilter = 'completed'
+      updateActiveFilter('filterCompleted')
+      render()
+    })
+    
+    qs('#filterToday').addEventListener('click', () => {
+      currentFilter = 'today'
+      updateActiveFilter('filterToday')
+      render()
+    })
+    
+    qs('#filterOverdue').addEventListener('click', () => {
+      currentFilter = 'overdue'
+      updateActiveFilter('filterOverdue')
+      render()
+    })
+    
+    function updateActiveFilter(activeId) {
+      qsa('.chip').forEach(chip => {
+        chip.classList.toggle('active', chip.id === activeId)
+      })
+    }
+    
+    // View controls
+    qsa('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchView(btn.dataset.view))
+    })
+    
+    // Modal events
+    closeModalBtn.addEventListener('click', () => taskModal.classList.remove('active'))
+    cancelModalBtn.addEventListener('click', () => taskModal.classList.remove('active'))
+    saveModalBtn.addEventListener('click', saveTask)
+    addSubtaskBtn.addEventListener('click', addSubtask)
+    
+    modalSubtasks.addEventListener('click', e => {
+      if (e.target.closest('.delete-subtask')) {
+        const index = parseInt(e.target.closest('.delete-subtask').dataset.index)
+        deleteSubtask(index)
+      }
+    })
+    
+    // Focus mode events
+    focusModeBtn.addEventListener('click', () => {
+      const firstPending = tasks.find(t => t.status === 'pending')
+      if (firstPending) {
+        enterFocusMode(firstPending.id)
+      } else {
+        alert('No pending tasks to focus on!')
+      }
+    })
+    
+    startTimerBtn.addEventListener('click', startTimer)
+    pauseTimerBtn.addEventListener('click', pauseTimer)
+    resetTimerBtn.addEventListener('click', resetTimer)
+    exitFocusBtn.addEventListener('click', exitFocusMode)
+    applyTimerBtn.addEventListener('click', resetTimer)
+    
+    // Theme toggle
+    themeToggle.addEventListener('click', toggleTheme)
+    
+    // Calendar navigation
+    qs('#prevMonth').addEventListener('click', () => {
+      // In a real app, this would navigate to the previous month
+      alert('Previous month navigation would be implemented in a full version')
+    })
+    
+    qs('#nextMonth').addEventListener('click', () => {
+      // In a real app, this would navigate to the next month
+      alert('Next month navigation would be implemented in a full version')
+    })
+    
+    // Initialize
+    render()
+    switchView('list')
+    updateActiveFilter('filterAll')
+    
+    // Add some sample tasks if empty
+    if (tasks.length === 0) {
+      const sampleTasks = [
+        {
+          id: uid(),
+          title: 'Complete project proposal',
+          description: 'Finish the draft and send for review',
+          priority: 'High',
+          category: 'Work',
+          due: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+          timeEstimate: 120,
+          status: 'pending',
+          subtasks: [
+            { title: 'Research competitors', completed: true },
+            { title: 'Outline key points', completed: true },
+            { title: 'Write first draft', completed: false },
+            { title: 'Review and edit', completed: false }
+          ],
+          recurrence: 'none',
+          created: Date.now() - 86400000,
+          completedAt: null
+        },
+        {
+          id: uid(),
+          title: 'Morning workout',
+          description: '30 minutes of cardio and strength training',
+          priority: 'Medium',
+          category: 'Health',
+          due: new Date().toISOString().split('T')[0],
+          timeEstimate: 30,
+          status: 'pending',
+          subtasks: [],
+          recurrence: 'daily',
+          created: Date.now() - 172800000,
+          completedAt: null
+        },
+        {
+          id: uid(),
+          title: 'Read industry articles',
+          description: 'Catch up on latest trends and news',
+          priority: 'Low',
+          category: 'Study',
+          due: null,
+          timeEstimate: 45,
+          status: 'completed',
+          subtasks: [],
+          recurrence: 'weekly',
+          created: Date.now() - 259200000,
+          completedAt: Date.now() - 86400000
+        }
+      ]
+      
+      tasks = sampleTasks
+      save()
+      render()
+    }
+  </script>
+</body>
+</html>
